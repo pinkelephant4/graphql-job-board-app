@@ -1,0 +1,40 @@
+type Query {
+    company(id: ID!): Company
+    job(id: ID!): Job
+    jobs: [Job!]
+}
+
+type Mutation {
+    createJob(input: CreateJobInput!): Job
+    deleteJob(id: ID!): Job
+    updateJob(input: UpdateJobInput!): Job
+}
+
+type Company {
+    id: ID!
+    name: String!
+    description: String
+    jobs: [Job!]!
+}
+
+type Job {
+    id: ID!
+    """
+    This is date for when the job was created in ISO format. eg `2025-11-19`
+    """
+    date: String!
+    title: String!
+    company: Company!
+    description: String
+}
+
+input CreateJobInput {
+    title: String!
+    description: String
+}
+
+input UpdateJobInput {
+    id: ID!
+    title: String!
+    description: String
+}
