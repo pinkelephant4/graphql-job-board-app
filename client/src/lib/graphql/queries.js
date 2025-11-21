@@ -1,9 +1,25 @@
+import { ApolloClient, gql, HttpLink, InMemoryCache } from "@apollo/client";
 import { getAccessToken } from "../auth";
-import { ApolloClient, gql, InMemoryCache, HttpLink } from "@apollo/client";
+import { SetContextLink } from "@apollo/client/link/context";
+
+const httpLink = new HttpLink({ uri: "http://localhost:4000/graphql" });
+
+const authLink = new SetContextLink(({ headers }) => {
+    const token = getAccessToken();
+    if (token) {
+        return {
+            headers: {
+                ...headers,
+                Authorization: `Bearer ${token}`,
+            },
+        };
+    }
+    return { headers };
+});
 
 const apolloClient = new ApolloClient({
     cache: new InMemoryCache(),
-    link: new HttpLink({ uri: "http://localhost:4000/graphql" }),
+    link: authLink.concat(httpLink),
 });
 
 export const createJob = async ({ title, description }) => {
@@ -50,6 +66,7 @@ export const getCompany = async (id) => {
 export const getJob = async (id) => {
     const query = gql`
         # naming the query JobById for no other purpose than to directly paste into sandbox and save it there.
+        # found a purpose, the operationName is set to the query name in apolloClient when we log operation object, while creating custom links.
         query JobById($id: ID!) {
             job(id: $id) {
                 id
