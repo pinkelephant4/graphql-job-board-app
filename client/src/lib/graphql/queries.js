@@ -20,7 +20,33 @@ const authLink = new SetContextLink(({ headers }) => {
 const apolloClient = new ApolloClient({
     cache: new InMemoryCache(),
     link: authLink.concat(httpLink),
+    // to set fetch policy for all the queries
+    // defaultOptions: {
+    //     query: {
+    //         fetchPolicy: "network-only ",
+    //     },
+    //     watchQuery: {
+    //         fetchPolicy: "network-only",
+    //     },
+    // },
 });
+
+const JobByIdQuery = gql`
+    # naming the query JobById for no other purpose than to directly paste into sandbox and save it there.
+    # found a purpose, the operationName is set to the query name in apolloClient when we log operation object, while creating custom links.
+    query JobById($id: ID!) {
+        job(id: $id) {
+            id
+            title
+            date
+            description
+            company {
+                id
+                name
+            }
+        }
+    }
+`;
 
 export const createJob = async ({ title, description }) => {
     const mutation = gql`
@@ -31,8 +57,12 @@ export const createJob = async ({ title, description }) => {
                 # defining that input parameter for the muation is the variable $input.
                 id
                 title
-                description
                 date
+                description
+                company {
+                    id
+                    name
+                }
             }
         }
     `;
@@ -40,6 +70,14 @@ export const createJob = async ({ title, description }) => {
     const { data } = await apolloClient.mutate({
         mutation,
         variables: { input: { title, description } },
+        //function called after we get response, cache and result is from server
+        update: (cache, { result }) => {
+            cache.writeQuery({
+                query: JobByIdQuery,
+                variables: { id: data.job.id },
+                data,
+            });
+        },
     });
     return data.job;
 };
@@ -64,23 +102,7 @@ export const getCompany = async (id) => {
 };
 
 export const getJob = async (id) => {
-    const query = gql`
-        # naming the query JobById for no other purpose than to directly paste into sandbox and save it there.
-        # found a purpose, the operationName is set to the query name in apolloClient when we log operation object, while creating custom links.
-        query JobById($id: ID!) {
-            job(id: $id) {
-                id
-                title
-                date
-                description
-                company {
-                    id
-                    name
-                }
-            }
-        }
-    `;
-    const { data } = await apolloClient.query({ query, variables: { id } });
+    const { data } = await apolloClient.query({ query: JobByIdQuery, variables: { id } });
     return data.job;
 };
 
@@ -98,6 +120,11 @@ export const getJobs = async () => {
             }
         }
     `;
-    const { data } = await apolloClient.query({ query });
+    const { data } = await apolloClient.query({
+        query,
+        fetchPolicy: "network-only",
+        // 'network-only' -> only get data from network/server
+        // 'cache-first' -> apolloClient gets data from cache first, if not in cache then calls server. (default)
+    });
     return data.jobs;
 };
