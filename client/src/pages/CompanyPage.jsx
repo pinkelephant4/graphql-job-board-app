@@ -1,6 +1,5 @@
 import { useParams } from "react-router";
-import { useEffect, useState } from "react";
-import { CompanyByIdQuery, getCompany } from "../lib/graphql/queries";
+import { CompanyByIdQuery } from "../lib/graphql/queries";
 import JobList from "../components/JobList";
 import { useQuery } from "@apollo/client/react";
 
