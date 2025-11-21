@@ -31,21 +31,29 @@ const apolloClient = new ApolloClient({
     // },
 });
 
+//fragments for reusability of fields to get for an object type
+const jobDetailFragment = gql`
+    fragment JobDetail on Job {
+        id
+        title
+        date
+        description
+        company {
+            id
+            name
+        }
+    }
+`;
+
 const JobByIdQuery = gql`
     # naming the query JobById for no other purpose than to directly paste into sandbox and save it there.
     # found a purpose, the operationName is set to the query name in apolloClient when we log operation object, while creating custom links.
     query JobById($id: ID!) {
         job(id: $id) {
-            id
-            title
-            date
-            description
-            company {
-                id
-                name
-            }
+            ...JobDetail
         }
     }
+    ${jobDetailFragment}
 `;
 
 export const createJob = async ({ title, description }) => {
@@ -55,15 +63,9 @@ export const createJob = async ({ title, description }) => {
             # alias of job so we can do data.job
             job: createJob(input: $input) {
                 # defining that input parameter for the muation is the variable $input.
-                id
-                title
-                date
-                description
-                company {
-                    id
-                    name
-                }
+                ...JobDetail
             }
+            ${jobDetailFragment}
         }
     `;
     //define the variables to be injected into the request here.
