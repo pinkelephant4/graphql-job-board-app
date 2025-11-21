@@ -1,14 +1,9 @@
-import { GraphQLClient, gql } from "graphql-request";
 import { getAccessToken } from "../auth";
+import { ApolloClient, gql, InMemoryCache, HttpLink } from "@apollo/client";
 
-const client = new GraphQLClient("http://localhost:4000/graphql", {
-    headers: () => {
-        const token = getAccessToken();
-        if (token) {
-            return { Authorization: `Bearer ${token}` };
-        }
-        return {};
-    },
+const apolloClient = new ApolloClient({
+    cache: new InMemoryCache(),
+    link: new HttpLink({ uri: "http://localhost:4000/graphql" }),
 });
 
 export const createJob = async ({ title, description }) => {
@@ -26,8 +21,11 @@ export const createJob = async ({ title, description }) => {
         }
     `;
     //define the variables to be injected into the request here.
-    const { job } = await client.request(mutation, { input: { title, description } });
-    return job;
+    const { data } = await apolloClient.mutate({
+        mutation,
+        variables: { input: { title, description } },
+    });
+    return data.job;
 };
 
 export const getCompany = async (id) => {
@@ -45,8 +43,8 @@ export const getCompany = async (id) => {
             }
         }
     `;
-    const { company } = await client.request(query, { id });
-    return company;
+    const { data } = await apolloClient.query({ query, variables: { id } });
+    return data.company;
 };
 
 export const getJob = async (id) => {
@@ -65,8 +63,8 @@ export const getJob = async (id) => {
             }
         }
     `;
-    const { job } = await client.request(query, { id });
-    return job;
+    const { data } = await apolloClient.query({ query, variables: { id } });
+    return data.job;
 };
 
 export const getJobs = async () => {
@@ -83,6 +81,6 @@ export const getJobs = async () => {
             }
         }
     `;
-    const { jobs } = await client.request(query);
-    return jobs;
+    const { data } = await apolloClient.query({ query });
+    return data.jobs;
 };
