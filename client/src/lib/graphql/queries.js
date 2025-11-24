@@ -80,15 +80,15 @@ export const createJob = async ({ title, description }) => {
                 # defining that input parameter for the muation is the variable $input.
                 ...JobDetail
             }
-            ${jobDetailFragment}
         }
+        ${jobDetailFragment}
     `;
     //define the variables to be injected into the request here.
     const { data } = await apolloClient.mutate({
         mutation,
         variables: { input: { title, description } },
         //function called after we get response, cache and result is from server
-        update: (cache, { result }) => {
+        update: (cache, { data }) => {
             cache.writeQuery({
                 query: JobByIdQuery,
                 variables: { id: data.job.id },
