@@ -70,6 +70,17 @@ export const getAllJobs = gql`
     }
 `;
 
+export const createJobMutation = gql`
+    # defining that this mutation takes a variable called input of type CreateJobInput
+    mutation makeJob($input: CreateJobInput!) {
+        # alias of job so we can do data.job
+        job: createJob(input: $input) {
+            # defining that input parameter for the muation is the variable $input.
+            ...JobDetail
+        }
+    }
+    ${jobDetailFragment}
+`;
 
 export const createJob = async ({ title, description }) => {
     const mutation = gql`
