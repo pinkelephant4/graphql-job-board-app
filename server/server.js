@@ -1,11 +1,12 @@
 import { ApolloServer } from "@apollo/server";
+import { expressMiddleware as apolloMiddleware } from "@as-integrations/express5";
 import cors from "cors";
 import express from "express";
-import { expressMiddleware as apolloMiddleware } from "@as-integrations/express5";
-import { authMiddleware, handleLogin } from "./auth.js";
 import { readFile } from "node:fs/promises";
-import { resolvers } from "./resolvers.js";
+import { authMiddleware, handleLogin } from "./auth.js";
+import { createCompanyLoader } from "./db/companies.js";
 import { getUser } from "./db/users.js";
+import { resolvers } from "./resolvers.js";
 
 const PORT = 4000;
 const app = express();
@@ -19,11 +20,12 @@ const server = new ApolloServer({
     resolvers,
 });
 const getContext = async ({ req, res }) => {
+    const companyLoader = createCompanyLoader();
+    const context = { companyLoader };
     if (req.auth) {
-        const user = await getUser(req.auth.sub);
-        return { user };
+        context.user = await getUser(req.auth.sub);
     }
-    return {};
+    return context;
 };
 
 await server.start();

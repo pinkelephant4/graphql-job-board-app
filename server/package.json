@@ -17,6 +17,7 @@
         "@as-integrations/express5": "^1.1.2",
         "better-sqlite3": "^12.4.1",
         "cors": "^2.8.5",
+        "dataloader": "^2.2.3",
         "express": "^5.1.0",
         "express-jwt": "^8.5.1",
         "graphql": "^16.12.0",
