@@ -1,8 +1,9 @@
 import { useState } from "react";
 import JobList from "../components/JobList";
 import { useJobs } from "../lib/graphql/hooks";
+import PaginationBar from "../components/PaginationBar.jsx";
 
-const JOBS_PER_PAGE = 7;
+const JOBS_PER_PAGE = 5;
 
 function HomePage() {
     const [currPage, setCurrPage] = useState(1);
@@ -16,25 +17,11 @@ function HomePage() {
     return (
         <div>
             <h1 className="title">Job Board</h1>
-            <div>
-                <button
-                    disabled={currPage <= 1}
-                    onClick={() => {
-                        setCurrPage((prev) => prev - 1);
-                    }}
-                >
-                    Previous
-                </button>
-                <span>{`${currPage} of ${totalPages}`}</span>
-                <button
-                    disabled={currPage >= totalPages}
-                    onClick={() => {
-                        setCurrPage((prev) => prev + 1);
-                    }}
-                >
-                    Next
-                </button>
-            </div>
+            <PaginationBar
+                currentPage={currPage}
+                totalPages={totalPages}
+                onPageChange={setCurrPage}
+            />
             <JobList jobs={jobs.items} />
         </div>
     );
