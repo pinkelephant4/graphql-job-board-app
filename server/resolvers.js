@@ -1,6 +1,14 @@
 import { GraphQLError } from "graphql";
 import { getCompany } from "./db/companies.js";
-import { createJob, deleteJob, getJob, getJobs, getJobsByCompany, updateJob } from "./db/jobs.js";
+import {
+    createJob,
+    deleteJob,
+    getJob,
+    getJobs,
+    getJobsByCompany,
+    getJobsCount,
+    updateJob,
+} from "./db/jobs.js";
 
 export const resolvers = {
     Query: {
@@ -14,7 +22,11 @@ export const resolvers = {
             if (!job) throw notFoundError(`No Job found with id ${args.id}`);
             return job;
         },
-        jobs: (_root, { limit, offset }) => getJobs(limit, offset),
+        jobs: async (_root, { limit, offset }) => {
+            const items = await getJobs(limit, offset);
+            const totalCount = await getJobsCount();
+            return { items, totalCount };
+        },
     },
     Mutation: {
         createJob: (_root, { input: { title, description } }, { user }) => {
