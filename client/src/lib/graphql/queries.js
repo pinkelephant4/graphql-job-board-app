@@ -1,6 +1,6 @@
 import { ApolloClient, gql, HttpLink, InMemoryCache } from "@apollo/client";
-import { getAccessToken } from "../auth";
 import { SetContextLink } from "@apollo/client/link/context";
+import { getAccessToken } from "../auth";
 
 const httpLink = new HttpLink({ uri: "http://localhost:4000/graphql" });
 
@@ -81,34 +81,6 @@ export const createJobMutation = gql`
     }
     ${jobDetailFragment}
 `;
-
-export const createJob = async ({ title, description }) => {
-    const mutation = gql`
-        # defining that this mutation takes a variable called input of type CreateJobInput
-        mutation makeJob($input: CreateJobInput!) {
-            # alias of job so we can do data.job
-            job: createJob(input: $input) {
-                # defining that input parameter for the muation is the variable $input.
-                ...JobDetail
-            }
-        }
-        ${jobDetailFragment}
-    `;
-    //define the variables to be injected into the request here.
-    const { data } = await apolloClient.mutate({
-        mutation,
-        variables: { input: { title, description } },
-        //function called after we get response, cache and result is from server
-        update: (cache, { data }) => {
-            cache.writeQuery({
-                query: JobByIdQuery,
-                variables: { id: data.job.id },
-                data,
-            });
-        },
-    });
-    return data.job;
-};
 
 export const CompanyByIdQuery = gql`
     query getCompanyById($id: ID!) {
