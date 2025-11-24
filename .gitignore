@@ -1,6 +1,7 @@
 server/logs
 server/*.log
 server/data
+server/.env
 
 client/node_modules
 server/node_modules
